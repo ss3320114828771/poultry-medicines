@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useState, useEffect, useMemo } from 'react'
+import React, { useState, useEffect, useMemo, Suspense } from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
 import { useSearchParams, useRouter } from 'next/navigation'
@@ -24,7 +24,8 @@ interface PriceRange {
   label: string
 }
 
-export default function ProductsPage() {
+// Separate component that uses useSearchParams
+function ProductsContent() {
   const router = useRouter()
   const searchParams = useSearchParams()
   const categoryParam = searchParams.get('category')
@@ -177,7 +178,6 @@ export default function ProductsPage() {
   const handleAddToCart = (product: Product) => {
     console.log('Added to cart:', product.id, product.name)
     alert(`${product.name} added to cart!`)
-    // Implement cart functionality here
   }
 
   // Handle view details
@@ -407,9 +407,7 @@ export default function ProductsPage() {
                   </button>
                 </div>
 
-                {/* Mobile Filters Content */}
                 <div className="space-y-6">
-                  {/* Search */}
                   <div>
                     <label className="block text-sm font-semibold text-gray-700 mb-2">Search</label>
                     <input
@@ -421,7 +419,6 @@ export default function ProductsPage() {
                     />
                   </div>
 
-                  {/* Categories */}
                   <div>
                     <label className="block text-sm font-semibold text-gray-700 mb-2">Categories</label>
                     {CATEGORIES.map((cat) => (
@@ -440,7 +437,6 @@ export default function ProductsPage() {
                     ))}
                   </div>
 
-                  {/* Apply Button */}
                   <Button
                     size="lg"
                     variant="primary"
@@ -465,7 +461,6 @@ export default function ProductsPage() {
                     <span className="font-bold">{filteredProducts.length}</span> products
                   </p>
                   
-                  {/* View Mode Toggle */}
                   <div className="flex items-center gap-1 border-2 border-gray-200 rounded-lg p-1">
                     <button
                       onClick={() => setViewMode('grid')}
@@ -486,7 +481,6 @@ export default function ProductsPage() {
                   </div>
                 </div>
 
-                {/* Sort Dropdown */}
                 <div className="flex items-center gap-2">
                   <span className="text-sm text-gray-600 whitespace-nowrap">Sort by:</span>
                   <select
@@ -504,7 +498,6 @@ export default function ProductsPage() {
               </div>
             </div>
 
-            {/* Products */}
             {paginatedProducts.length === 0 ? (
               <div className="text-center py-12 bg-white rounded-2xl">
                 <div className="text-6xl mb-4">😕</div>
@@ -520,7 +513,6 @@ export default function ProductsPage() {
                 : 'space-y-4'
               }>
                 {paginatedProducts.map((product) => {
-                  // Create product props without functions
                   const productProps = {
                     id: product.id,
                     name: product.name,
@@ -579,7 +571,6 @@ export default function ProductsPage() {
               </div>
             )}
 
-            {/* Pagination */}
             {totalPages > 1 && (
               <div className="mt-8 flex justify-center">
                 <div className="flex items-center gap-2">
@@ -704,5 +695,21 @@ export default function ProductsPage() {
         </div>
       )}
     </div>
+  )
+}
+
+// Main page component with Suspense
+export default function ProductsPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen bg-gradient-to-br from-orange-50 via-red-50 to-pink-50 pt-20 flex items-center justify-center">
+        <div className="text-center">
+          <div className="text-4xl animate-spin mb-4">⏳</div>
+          <p className="text-gray-600">Loading products...</p>
+        </div>
+      </div>
+    }>
+      <ProductsContent />
+    </Suspense>
   )
 }
